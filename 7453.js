@@ -1,0 +1,162 @@
+class MinHeap {
+    constructor() {
+        this.heap = [];
+    }
+
+    getLeftChildIndex(parentIndex) {
+        return 2 * parentIndex + 1;
+    }
+
+    getRightChildIndex(parentIndex) {
+        return 2 * parentIndex + 2;
+    }
+
+    getParentIndex(childIndex) {
+        return Math.floor((childIndex - 1) / 2);
+    }
+
+    hasParent(childIndex) {
+        return this.getParentIndex(childIndex) >= 0;
+    }
+
+    hasLeftChild(parentIndex) {
+        return this.getLeftChildIndex(parentIndex) < this.heap.length;
+    }
+
+    hasRightChild(parentIndex) {
+        return this.getRightChildIndex(parentIndex) < this.heap.length;
+    }
+
+    leftChild(parentIndex) {
+        return this.heap[this.getLeftChildIndex(parentIndex)];
+    }
+
+    rightChild(parentIndex) {
+        return this.heap[this.getRightChildIndex(parentIndex)];
+    }
+
+    parent(childIndex) {
+        return this.heap[this.getParentIndex(childIndex)];
+    }
+
+    swap(indexA, indexB) {
+        const tmp = this.heap[indexA];
+        this.heap[indexA] = this.heap[indexB];
+        this.heap[indexB] = tmp;
+    }
+
+    peek() {
+        return this.heap.length == 0 ? null : this.heap[0];
+    }
+
+    isEmpty() {
+        return !this.heap.length;
+    }
+
+    pop() {
+        if (this.heap.length == 0) {
+            return null;
+        }
+
+        if (this.heap.length == 1) {
+            return this.heap.pop();
+        }
+
+        const item = this.heap[0];
+
+        this.heap[0] = this.heap.pop();
+        this.bubbleDown();
+        return item;
+    }
+
+    push(item) {
+        this.heap.push(item);
+        this.bubbleUp();
+        return this;
+    }
+
+    bubbleUp() {
+        let currentIndex = this.heap.length - 1;
+
+        while (
+            this.hasParent(currentIndex) &&
+            !this.pairIsInCorrectOrder(this.parent(currentIndex), this.heap[currentIndex])
+        ) {
+            this.swap(currentIndex, this.getParentIndex(currentIndex));
+            currentIndex = this.getParentIndex(currentIndex);
+        }
+    }
+
+    bubbleDown() {
+        let currentIndex = 0;
+        let nextIndex = null;
+
+        while (this.hasLeftChild(currentIndex)) {
+            if (
+                this.hasRightChild(currentIndex) &&
+                this.pairIsInCorrectOrder(this.rightChild(currentIndex), this.leftChild(currentIndex))
+            ) {
+                nextIndex = this.getRightChildIndex(currentIndex);
+            } else {
+                nextIndex = this.getLeftChildIndex(currentIndex);
+            }
+            if (this.pairIsInCorrectOrder(this.heap[currentIndex], this.heap[nextIndex])) {
+                break;
+            }
+            this.swap(currentIndex, nextIndex);
+            currentIndex = nextIndex;
+        }
+    }
+
+    pairIsInCorrectOrder(elementA, elementB) {
+        return elementA < elementB;
+    }
+}
+
+const [[N], ...input] = require('fs')
+    .readFileSync('./dev/stdin')
+    .toString()
+    .trim()
+    .split('\n')
+    .map((v) => v.split(' ').map(Number));
+
+const abheap = new MinHeap()
+const cdheap = new MinHeap()
+
+for (let i = 0; i < N; i++) {
+    for (let j = 0; j < N; j++) {
+        abheap.push(input[i][0] + input[j][1])
+        cdheap.push(-1 * (input[i][2] + input[j][3]))
+    }
+}
+
+let ans = 0;
+
+while (!abheap.isEmpty() && !cdheap.isEmpty()) {
+
+    let ab = abheap.peek()
+    let cd = cdheap.peek()
+    let abCnt = 0
+    let cdCnt = 0
+    if (ab - cd == 0) {
+        while (ab == abheap.peek()) {
+            abheap.pop()
+            abCnt += 1
+        }
+        while (cd == cdheap.peek()) {
+            cdheap.pop()
+            cdCnt += 1
+        }
+        ans += abCnt * cdCnt
+    } else if (ab - cd < 0) {
+        while (ab == abheap.peek()) {
+            abheap.pop()
+        }
+    } else {
+        while (cd == cdheap.peek()) {
+            cdheap.pop()
+        }
+    }
+}
+
+console.log(ans)
