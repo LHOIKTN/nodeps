@@ -26,11 +26,6 @@ for (let k = 2; k < N; k++) {
         }
         dp[s][e] = min
     }
-
-
 }
-
-
-
 //console.log(dp.map(v => v.join(' ')).join('\n'))
 console.log(dp[0][N - 1])
